@@ -195,7 +195,8 @@ public class TsFileSequenceReader implements AutoCloseable {
    */
   public String readTailMagic() throws IOException {
     long totalSize = tsFileInput.size();
-    ByteBuffer magicStringBytes = ByteBuffer.allocate(TSFileConfig.MAGIC_STRING.getBytes().length);
+    ByteBuffer magicStringBytes = ByteBuffer
+        .allocate(TSFileConfig.MAGIC_STRING.getBytes().length);
     tsFileInput.read(magicStringBytes, totalSize - TSFileConfig.MAGIC_STRING.getBytes().length);
     magicStringBytes.flip();
     return new String(magicStringBytes.array());
@@ -225,10 +226,13 @@ public class TsFileSequenceReader implements AutoCloseable {
    * to the end of the magic head string.
    */
   public String readHeadMagic(boolean movePosition) throws IOException {
-    ByteBuffer magicStringBytes = ByteBuffer.allocate(TSFileConfig.MAGIC_STRING.getBytes().length);
+    ByteBuffer magicStringBytes = ByteBuffer
+        .allocate(TSFileConfig.MAGIC_STRING.getBytes().length);
     if (movePosition) {
-      tsFileInput.position(0);
-      tsFileInput.read(magicStringBytes);
+      synchronized (this) {
+        tsFileInput.position(0);
+        tsFileInput.read(magicStringBytes);
+      }
     } else {
       tsFileInput.read(magicStringBytes, 0);
     }

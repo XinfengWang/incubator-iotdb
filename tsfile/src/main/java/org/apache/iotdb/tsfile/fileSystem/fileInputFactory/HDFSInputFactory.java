@@ -49,8 +49,7 @@ public class HDFSInputFactory implements FileInputFactory {
     } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
       logger.error(
           "Failed to get TsFile input of file: {}. Please check your dependency of Hadoop module.",
-          filePath,
-          e);
+          filePath, e);
       return null;
     }
   }

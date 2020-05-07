@@ -42,12 +42,6 @@ public class HDFSOutput implements TsFileOutput {
   private Path path;
   private static final Logger logger = LoggerFactory.getLogger(HDFSOutput.class);
 
-  public HDFSOutput(String filePath, boolean overwrite) throws IOException {
-    this(filePath, new Configuration(), overwrite);
-    path = new Path(filePath);
-  }
-
-
   public HDFSOutput(String filePath, Configuration configuration, boolean overwrite)
       throws IOException {
     this(new Path(filePath), configuration, overwrite);

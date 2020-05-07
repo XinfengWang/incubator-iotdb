@@ -100,18 +100,24 @@ public class ChunkMetadataCache {
   public List<ChunkMetadata> get(String filePath, Path seriesPath)
       throws IOException {
     if (!cacheEnable) {
-      // bloom filter part
-      TsFileSequenceReader tsFileReader = FileReaderManager.getInstance().get(filePath, true);
-      BloomFilter bloomFilter = tsFileReader.readBloomFilter();
-      if (bloomFilter != null && !bloomFilter.contains(seriesPath.getFullPath())) {
-        if (logger.isDebugEnabled()) {
-          logger.debug(String
-              .format("path not found by bloom filter, file is: %s, path is: %s", filePath, seriesPath));
+      lock.writeLock().lock();
+      try {
+        // bloom filter part
+        TsFileSequenceReader tsFileReader = FileReaderManager.getInstance().get(filePath, true);
+        BloomFilter bloomFilter = tsFileReader.readBloomFilter();
+        if (bloomFilter != null && !bloomFilter.contains(seriesPath.getFullPath())) {
+          if (logger.isDebugEnabled()) {
+            logger.debug(String
+                .format("path not found by bloom filter, file is: %s, path is: %s", filePath,
+                    seriesPath));
+          }
+          // If timeseries isn't included in the tsfile, empty list is returned.
+          return new ArrayList<>();
         }
-        return new ArrayList<>();
+        return tsFileReader.getChunkMetadataList(seriesPath);
+      } finally {
+        lock.writeLock().unlock();
       }
-      // If timeseries isn't included in the tsfile, empty list is returned.
-      return tsFileReader.getChunkMetadataList(seriesPath);
     }
 
     String key = (filePath + IoTDBConstant.PATH_SEPARATOR
